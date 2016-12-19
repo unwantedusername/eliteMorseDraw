@@ -1,0 +1,232 @@
+<!--
+UA Morse Drawer Tool
+
+Initial discovery: CMDR Mike Juliet Kilo
+Morse transcriptions provided by: CMDR RiZ@L
+
+Version history:
+v0.1 - Initial hasty slapdash version by CMDR Anjin
+v0.2 - Polish, presets, scaling, and colourisation added by CMDR RedWizzard
+v0.3 - Grid lines and mangled styling added by CMDR Anjin
+
+-->
+<!DOCTYPE html>
+<html><head>
+<meta http-equiv="content-type" content="text/html; charset=UTF-8">
+<meta name="viewport" content="width=640, initial-scale=1">
+<title>UA MORSE DRAWER v0.3b</title>
+<link href="index_files/css.css" rel="stylesheet" type="text/css">
+<style type="text/css">
+	html, body { margin: 0; padding: 0; width: 100%; height: 100%; }
+	body { font-family: 'Coda', sans-serif; background-color: #000000; color: #EF7B04; }
+	select { font-family: 'Coda', sans-serif; background-color: #000000; color: #AAAAAA; font-size: 0.8em; }
+	input[type=button] { font-family: 'Coda', sans-serif; background-color: #EF7B04; color: #FFFFFF; border-style: none; font-size: 1em; }
+	input[type=button]:hover { background-color: #F19230; }
+	input[type=checkbox] { margin-left: 2em; }
+	textarea { background-color: #555555; color: #FFFFFF; border-style: none; }
+	.logo { width: 32px; height: 32px; float:left; }
+	.drawButton { width: 96px; height: 64px; margin-left: 4px; }
+	.clear { clear: both; }
+	.titleBar { background-color: #EF7B04; color: #000000; margin-bottom: 4px; padding: 2px; font-size: 1.5em; }
+	.section { float: left; }
+	.subSection { padding: 0 0 16px 8px; border-bottom: 1px solid #555555; }
+	.wideSection { }
+	#morse { float: left; }
+	#ships { width: 500px; }
+	#myCanvas { }
+	#list { display: block; float: left; padding-left: 8px; font-family: consolas, monospace; font-size: 0.8em; }
+	#wideList { display: none; float: left; padding: 0 16px 0 16px; font-family: consolas, monospace; font-size: 0.8em; }
+	@media only screen and (min-width: 1130px) {
+		#list { display: none; }
+		#wideList { display: block; }
+		.wideSection { float: left; }
+	}
+</style>
+<link rel="stylesheet" type="text/css" href="index_files/socialwidgets.css"></head>
+<body>
+	<div class="titleBar">
+		<img class="logo" src="data:image/png;base64,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" alt="CANONN">
+		<div class="section">UA MORSE DRAWER v0.3b</div>
+		<div class="clear"></div>
+	</div>
+	<div class="section">
+		<div class="wideSection">
+			<canvas id="myCanvas" width="532" height="532"></canvas>
+		</div>
+		<div id="wideList"></div>
+		<div class="wideSection">
+			<div class="subSection">
+				<div>Presets:</div>
+				<select id="ships"><option selected="selected"></option><option>Adder</option><option>Anaconda</option><option>Asp</option><option>Asp Scout</option><option>Cobra MkIII</option><option>Cobra MkIV</option><option>Diamondback Explorer</option><option>Diamondback Scout</option><option>Eagle</option><option>Federal Corvette</option><option>Federal Dropship</option><option>Fer de Lance</option><option>Hauler</option><option>Imperial Courier</option><option>Imperial Clipper</option><option>Imperial Cutter</option><option>Keelback</option><option>Orca</option><option>Python</option><option>Sidewinder</option><option>Type 6</option><option>Type 7</option><option>Type 9 Heavy</option><option>Viper MkIII</option><option>Viper MkIV</option><option>Vulture</option></select>
+			</div>
+			<div class="subSection">
+				<div>Morse code text:</div>
+				<textarea id="morse" rows="10" cols="48"></textarea>
+				<input class="drawButton" value="DRAW" onclick="draw();" type="button">
+				<div class="clear"></div>
+			</div>
+			<div class="subSection">
+				<div>Options:</div>
+				<div><input checked="checked" id="colours" type="checkbox">Colourise</div>
+				<div><input checked="checked" id="gridlines" type="checkbox">Grid lines</div>
+			</div>
+		</div>
+	</div>
+	<div id="list"></div>
+	
+	<script type="text/javascript">
+		var ships = {
+			"": "",
+			"Adder": "BTCQEQ BTEQFQ BTFQEU BTFQDV BTDVCV CQCNDM CQDMDQ DMHIMG DMGMDQ DQGMFQ EUFQHP EUHPKN EUKNPM EUPMIU EUIUGV EUGVDV FQGMHP GMHIJH GMJHNF GMNFPF GMPFJL GMJLKN HIIGJH PJLKNN IGLEMF IGMFJH IUPMQO JHNFNF JLPFPG JLPGSG JLSGKN KNSGPM PFQDPG PGQDSD PGSDSG PMSGVH PMVHVM PMVMQO SDTBSG SGTBTF SGTFVH VHXGVM VMXGYI XGYEYI",
+			"Anaconda": "NALBOB JGLBMG KIJGKM HPKMJS HTKSIW HWKSJZ JZKSMZ MTPZPS MZPSPZ KSNJLB LBOBNJ OBSPQS NJOBRT RSSTSV NJPSOZ SVQZPZ NJPSPLS",
+			"Asp": "AODJHM AOHMQT DJFIHM EHHHII EHIIFI FIIIHM HHJGKG HHKGNG HHNGMH HHMHII HMIILI HMLISR HMSRQT IIMHLI KFNGKG LIMHWQ LIWQUQ LIUQSR MHNGOG MHOGWQ OGVIZN OGZNYO STSRST URUQST STUQUR UQWQWR UQWRVS UQVSUR WQYOYP WQYPWR",
+			"Asp Scout": "AJGFGJ AJGJEK AJEKBL BLEKBM BMEKFL BMFLCO COFLHL COHLDR DRHLMP DRMPRU EKGJHL EKHJFL GFKFNI GFNIGJ GJNIHL HLNIMP KFOGNI MPNIRU NIOGTI NITIRU RUTIXQ RUXQVV",
+			"Cobra MkIII": "FCAJBM FCHHBM FCLBHH BMHHHO LBHHQP HHHOQP LBQPVL QPVLWP",
+			"Cobra MkIV": "FCAJBM FCHHBM FCLBHH BMHHHO LBHHQP HHHOQP LBQPVL QPVLWP",
+			"Diamondback Explorer": "BUCQEV BUEVEX BUEXBW CQFNFR CQFREV EKIIGJ EVFRHT EVHTHV EVHVEX FNGKHL FNHLIO FNIOFR FRIOIQ FRIQHT GKIILM GKLMHL HLLMKM HLKMIO HTIQIT HTITIW HTIWHV HVIWHW IIMGNK IINKLM IOKMIQ IQKMIS ISKMLM ISLMMR ISMRMS ISMSIW IWMSLV LMNKON LMONMR MGTDSF MGSFRH MGRHNK MRONOP MROPMS MSOPPP MSPPPR NKRHPM NKPMON ONPMPO ONPOOP OPPOPP PMRHVK PMVKZP PMZPXS PMXSPO POXSPP PPXSPR RHSFVF RHVFYI RHYIYJ RHYJVK VFXEYI",
+			"Diamondback Scout": "BOCMCQ BOCQCS BOCSBQ CMFKDO CMDOCQ CQDOFP CQFPGR CQGRCS DOFKGL DOGLHN DOHNFP FKHIGL FPHNJO FPJOJP FOJPGR GLHIKK GLKKHN GRJPJR HIMGKK HNKKNM HNNMJO JONMNN JONNJP JPNNNP JPNPJR KKMGOI KKOINM MFPEOG MFOGOH MFOHMG MGOHOI NMOIPK NMPKPN NMPNNN NNPNOP NNOPNP OGPESE OGSEQI OGQIOH OHQIOI OIQIPK OPPNQO PEUDSE PKQIXI PKXIWK PKWKZN PKZNWQ PKWQQO QISEXI SEUDVE SEVEZH SEZHXI UDVCVE VEXEZH XEZDZH XIZHZI",
+			"Eagle": "CMCRKO DRKNMY KNLDMK LDMAOD ODMKQN MKMYQN MYQNXR QNXRXM",
+			"Federal Corvette": "AJHFAC BNDMCO CJHFFJ CJFJGK CJGKDM CODMTV DMGKHL DMHLIL DMILTU DMTUTV FJHFII FJIIGK GKIIJJ GKJJJK GKJKIL GKILHL HFMFII IIMFQI IIQIJJ ILJKTU JJQIJK JKQIWP JKWPZT JKZTWV JKWVTU MFNFQI QIXOWP",
+			"Federal Dropship": "AOFKHK FKFIHK FIHHHK HKHHKI HHJGLI JGNGKH FMGKJN HKLIJN JNLIRH GNFQHO IPJNJP GTIPJT IPJNMS INNKMT MTNIYR NKZPYS NKRHZP",
+			"Fer de Lance": "ATKIJM KILGMI JMKINH NHPFOI OITIQJ TIVITJ VIXGWI UKUIWI UKWIWJ ROUJXL WLZMUO BUROWO BUIMTJ BUTKRO KLNNRJ NIQNQJ",
+			"Hauler": "ASAOHP AOEKHP DKKLAO DKJGHK JGKFLG JGNGHK NGRHHK RHKLHK RHSFTI RHRNKL TIVMZN VMSPRN KLRNFQ CSRNSP ASHPCS",
+			"Imperial Courier": "AQHLHM AQHLHM AQGOHO AQGOMO GKGJHL GKCKEJ BJCICK CIIGGJ IGKFLG JHLGKH GJKIMJ MJSHVK SHVIVK LLMJVK BRLLMO BRMOLQ LLVKMO LQMORP LQQRRP PTPVQU PTXPYR QUYRXP PVPVXS QUYQXS QRRPVQ RPUOVQ MOVKYM VKXJYM MOUOYM",
+			"Imperial Clipper": "AQBPDN ARFQGR CQDOEP DNKKHN FLNIGM FLFJNI FJFINI FIHHJH CICHDH CHFFDH DHFFIF FFIEIF HHIGJH KKRHRI KKRIMN MNRISJ FQMNGR GRMNLQ LQTLPP LQPPOR ORTLQS QSTMRS SSTMTT TMULUM URVSTT SVTUTV TUXRYS TUTVYS XRZSYS TVXUZS",
+			"Imperial Cutter": "AGBFBJ AGBJAH BFCGBJ BJCGCH BJCHCI BJCICJ CHGFCI CIGFHI CIHIGJ GENHKI GEKIJM GEJMHI GEHIGF GJHIJM JMKILJ JMLJML JMMLNP KINHLJ LJNHOI LJOINK LJNKML MLNKRO MLROPP MLPPNP NGOGQI NGQIOI NGOINH NKOIVP NKVPUP NKUPRO NPPPSS OIQIQJ OIQJVP PPROUQ PPUQTR PPTRWU PPWUSS QJVOVP ROUPUQ TRUQYU TRYUWU UPVPVQ UPVQUQ UQVQYU VOWPVP VPWPVQ VQWPYU WPYSYU",
+			"Keelback": "BOCNCP BOCPBQ BQCPCR CNEMEO CNEOCP CPEOFQ CPFQFS CPFSCR EKGJGN EKGNEM EMGNEO EOGNHP EOHPFQ FQHPIP FQIPMS FQMSHS FQHSES GJJIIK GJIKIN GJINGN GNINHP HPINIP HSMSIT IKJIJK IKJKIN INJKJL INJLIP IPJLMM IPMMMN IPMNOO IPOOMS JILJJK JKLJOJ JKOJMK JKMKJL JLMKMM MKOJNK MKNKMM MMNKMN MNNKOM MNOMON MNONNO MSNOTQ MSTQPS NKOJOM NOONTP NOTPTQ OJSJTP OJTPOM OMTPON PSTQTR SJVKTP TPVKWO TPWOWP TPWPUQ TPUQTQ TQUQTR UQWPVQ VKWKWO WKYMWO WOYMYO",
+			"Orca": "CDFCFE CDFEEF CDEFGK CDGKCF CFGKEI CFEIDH CHDHEI CHEIDI EFFEGF EFGFIH EFIHIJ EFIJHK EFHKGK FCIDFE FEIDGF GFIDKI GFKIIH GKHKJM HKIJJM IDNHKI IHKIKJ IHKJIJ JKJJMO JMKJOM JMOMTT JMTTTU JMTUTV JMTVPS JPLPPS JPPSLR JMPSLP KINHOM KIOMKJ NHRLOM OMRLUQ OMUQTT TTUQVU TTVUTU TUVUWW TUWWTV UQVQXT UQXTXU UQXUVU VUXUWW WXXUXW XTYVXU XUYVXW",
+			"Python": "FAGAHG GAICHG HAMFHC ICMFJE JEMFKG JFKGJG MFNKRM NKRMTS LKTSPP PPTSTU PPTURX PPRXNU NURXOZ NUQZMX JPPPNU HGMKLO MKPPLO HGLOIP GHKPIP",
+			"Sidewinder": "ACNALC LCNAPC NAZCPC ACLCDL DLNAWL PCZCWL LEPEMG",
+			"Type 6": "CIEGON CIONEL CIELCO COELIP COIPHR COHRCQ CQHRHU EEEFGG EEGGFG EEFGEG EGEFON ELONIP FGGGON HRIPKS HRKSKT HRKTHU HUKTJV IPONOQ IPOQKS KDKLKF KFLDMF KFMFQH KFQHMI MFRFXJ MIQHQM MIQMON ONQMSQ OQSQSS OQSSRT QHXJUL QHULQM QMULSQ RTSSUS SQULVP SQVPVR SQVPSS SSVRUS ULXJXM ULXMVP XJYKXM XMYKYO",
+			"Type 7": "BVARGV ARAOEJ EJQIJL EJKHQI LMMGNG MGPERE NGRESF MHSFQI SFUFVG SFVGQI TIVGTJ JLTISK SKVIUL ULVIYG ULYGIP JLSKKO IOJLKO GQIOKO ETGQMT ETMTGV KOMQLR LRRRMT LRRPRR RRSPVR SPWPVR RPUNSP TNWLWN WNWLYN WLZMYN ULVIYG ULYGYI",
+			"Type 9 Heavy": "ANDPBP AMBLDN BIGKCK BIQNGL BICFGK CFGELH IFLELH LFPILH LFOHMH PHPFSG SGVGSH SHVGZN PHSGUL TGZNVJ MHIJLK MHQHPI LHPILK LKPIUL LKULQO ULYNYR TMYQUT YRYTVU VTYRVU RNVUPT MORNPT IPMOPT MRPTNU JPNUKT JBIPKT",
+			"Viper MkIII": "ANCKEL ANELEP CKEHEL EHJKEL EHFGJK EPJKVU JKWTVU FGOLON OLONRP RPTPVS QLYQWQ YOYQQL FGGFQL FGQLOL HGIFQL IFKFQL  KFQLYO KFOFYO",
+			"Viper MkIV": "BNIGDQ DQIGHL DQHLJM DQJMHO HLIGMF HLMFKK HLKKJM HOJMJP HSJPMN JMKKMM JMMMKN JMKNJP JPKNMN JUXMXO JUXOXQ JUXQKU KKMFQH KKQHRI KKRIMM KNMMMN MFRFQH MMRIMN QHRFTG RITGVH VHXJXM XJYKXM XMYKYN XMYNXO",
+			"Vulture": "APCJKR APKRER APERDR CJDIGJ CJGJPN CJPNKM CJKMKR ERKRLS ERLSGT FGGFHH GFKCOJ GFOJQL GFQLHH GJHHPM GJPMPN HHQLPM KCNDOJ KMPNMN KMMNKR KRMNNS KRNSLS MNPNQO MNQOSQ MNSQNS NDQGOJ NSSQOT OJQGQH OJQHSL OJSLQL OTQLVT PMQLRM PMRMQO PMQOPN PUVTVU QHTISL QLSLRM QORMUO QOUOSQ RMSLUO SLTIUI SLUIYN SLYNWN SQUOUR SQURVT UOWNYQ UOYQXR UOXRUR URWSVT VTWSWT VTWTVU"
+		};
+
+		var gradient = ["#FF0000", "#FF2A00", "#FF5500", "#FF7F00", "#FFAA00", "#FFD400", "#FFFF00", "#D4FF00", "#AAFF00", "#7FFF00", "#55FF00", "#2AFF00", "#00FF00", "#00FF2A", "#00FF55", "#00FF7F", "#00FFAA", "#00FFD4", "#00FFFF", "#00D4FF", "#00AAFF", "#007FFF", "#0055FF", "#002AFF", "#0000FF", "#3300FF", "#6600FF", "#9900FF", "#CC00FF", "#FF00FF"];
+		
+		var scale = 19;
+		
+		var colourCheck;
+		var shipSelect;
+		var canvas;
+		var morse;
+		var colourList;
+		
+		window.onload = function() {
+			colourCheck = document.getElementById('colours');
+			gridCheck = document.getElementById('gridlines');
+			shipSelect = document.getElementById('ships');
+			canvas = document.getElementById("myCanvas");
+			morse = document.getElementById('morse');
+			colourList = document.getElementById("list");
+			wideColourList = document.getElementById("wideList");
+
+			canvas.width = 28 * scale;
+			canvas.height = 28 * scale;
+			if (gridCheck.checked)
+				drawGridLines();
+			
+			for (var ship in ships) {
+				if (ships.hasOwnProperty(ship)) {
+					var el = document.createElement('option');
+					el.textContent = ship;
+					shipSelect.appendChild(el);
+				}
+			}
+			shipSelect.addEventListener('change', function() {
+				var ship = shipSelect.options[shipSelect.selectedIndex].text;
+				morse.value = ships[ship];
+				draw();
+			});
+			colourCheck.addEventListener('change', draw);
+			gridCheck.addEventListener('change', draw);
+		};
+		
+		function drawGridLines() {
+			var ctx = canvas.getContext("2d");
+			ctx.strokeStyle = "#555555";
+			ctx.font = "10px Coda, sans-serif";
+			ctx.beginPath();
+			for (g = 1; g != 27; ++g) {
+				ctx.moveTo(g*scale+scale/2,scale+scale/2);
+				ctx.lineTo(g*scale+scale/2,26*scale+scale/2);
+				ctx.moveTo(scale+scale/2,g*scale+scale/2);
+				ctx.lineTo(26*scale+scale/2,g*scale+scale/2);
+				var coord = String.fromCharCode(65-1+g);
+				ctx.strokeText(coord,g*scale+scale/2-(scale/4),scale+scale/2-(scale/3));
+				ctx.strokeText(coord,g*scale+scale/2-(scale/4),27*scale+scale/2);
+				ctx.strokeText(coord,scale+scale/2-scale,g*scale+scale/2+(scale/3));
+				ctx.strokeText(coord,26*scale+scale/2+(scale/3),g*scale+scale/2+(scale/3));
+			}
+			ctx.stroke();		
+		}
+		
+		function draw() {
+			var string = morse.value.toUpperCase();
+			var ctx = canvas.getContext("2d");
+			ctx.fillStyle = "black";
+			ctx.fillRect(0,0,canvas.width, canvas.height);
+
+			if (gridCheck.checked)
+				drawGridLines();
+			
+			var colorIdx = 0;
+			var count = 0;
+			
+			if (colourCheck.checked)
+				ctx.strokeStyle = gradient[colorIdx];
+			else
+				ctx.strokeStyle = "#FFFFFF";
+
+			var x = 0;
+			var y = 0;
+			var sx = 0;
+			var sy = 0;
+			var block = "";
+			colourList.textContent = "";
+			for (n = 0; n != string.length; ++n) {
+				var c = string.charAt(n);
+				if (c === '_') c = 'Z';
+				if (c.charCodeAt(0) >= 65 && c.charCodeAt(0) <= 90) {
+					if (count % 2 == 0) {
+						x = (c.charCodeAt(0) - 64) * scale + scale/2;
+					} else {
+						y = (c.charCodeAt(0) - 64) * scale + scale/2;
+					}
+					block += string.charAt(n);
+					if (count == 1) {
+						sx = x;
+						sy = y;
+						ctx.beginPath();
+						ctx.moveTo(x,y);
+					}
+					else if (count == 3)
+						ctx.lineTo(x,y);
+					else if (count == 5) {
+						ctx.lineTo(x,y);
+						ctx.lineTo(sx,sy);
+						ctx.stroke();
+					}					
+					if (++count == 6) {
+						count = 0;
+						if (colourCheck.checked) {
+							if (++colorIdx === gradient.length) colorIdx = 0;
+							ctx.strokeStyle = gradient[colorIdx];
+							var el = document.createElement("span");
+							el.textContent = block;
+							el.style.color = gradient[colorIdx];
+							colourList.appendChild(el);
+							colourList.appendChild(document.createElement("br"));
+						}
+						block="";
+					}
+				}
+			}
+			wideColourList.innerHTML = list.innerHTML;
+		}
+	</script>
+
+</body></html>
